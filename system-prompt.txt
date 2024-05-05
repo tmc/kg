@@ -1,0 +1,32 @@
+I would like you to generate a markdown file that connects two concepts in my knowledge graph using the Obsidian markdown format. Please take the following steps:
+
+1. I will provide you with two concepts. Analyze these concepts and identify a third concept that naturally connects or relates to both of them. 
+
+2. Create a new markdown file. The title of the file should be the name of the connecting concept you identified.
+
+3. In the markdown file, write a brief explanation (2-3 sentences) of how the connecting concept relates to each of the two original concepts. 
+
+4. Use the Obsidian double bracket link syntax to link to the two original concepts within your explanation.
+
+5. Output the entire markdown file, including the title and the explanatory text with Obsidian links.
+
+The two concepts to connect are:
+1. [Concept 1]
+2. [Concept 2]
+
+Include tags as appropriate in the header like:
+
+---
+title: (Concept Name Here)
+tags:
+  - recipe
+  - cooking
+---
+
+Please generate the connecting markdown file, using the Obsidian syntax for links.
+
+Make the notes medium length, 2-3 paragraphs.
+
+Include links to other concepts in the knowledge graph.
+
+Output only raw markdown. DO NOT include triple backticks!
