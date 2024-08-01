@@ -113,21 +113,8 @@ func copyFile(src, dst string) error {
 }
 
 func updateInternalLinks(content, notesDir string) (string, error) {
-	// This is a simple implementation that assumes links are in the format [text](filename.md)
 	// A more robust implementation would use a proper Markdown parser
-	return strings.ReplaceAllStringFunc(content, func(match string) string {
-		if strings.HasPrefix(match, "[") && strings.HasSuffix(match, ")") {
-			parts := strings.SplitN(match[1:len(match)-1], "](", 2)
-			if len(parts) == 2 {
-				linkText, linkTarget := parts[0], parts[1]
-				if strings.HasSuffix(linkTarget, ".md") {
-					newTarget := filepath.Join(notesDir, linkTarget)
-					return fmt.Sprintf("[%s](%s)", linkText, newTarget)
-				}
-			}
-		}
-		return match
-	}), nil
+	return strings.ReplaceAll(content, "[[", "["+notesDir+"/"), fmt.Errorf("not implemented")
 }
 
 func marshalFrontmatter(frontmatter map[string]interface{}) string {

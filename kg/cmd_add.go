@@ -2,15 +2,16 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 	"gopkg.in/yaml.v3"
 )
@@ -74,7 +75,7 @@ func getSuggestedTags(title string) ([]string, error) {
 	}
 
 	prompt := fmt.Sprintf("Suggest 3-5 relevant tags for a note titled '%s'. Respond with only the tags, separated by commas.", title)
-	completion, err := llm.Call(prompt, llms.WithMaxTokens(50))
+	completion, err := llm.Call(context.TODO(), prompt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get AI response: %w", err)
 	}
@@ -115,11 +116,11 @@ func confirmTags(suggestedTags []string) []string {
 
 func generateFrontmatter(title string, tags []string) string {
 	frontmatter := map[string]interface{}{
-		"title":     title,
-		"tags":      tags,
-		"date":      time.Now().Format("2006-01-02"),
-		"lastmod":   time.Now().Format("2006-01-02"),
-		"draft":     false,
+		"title":   title,
+		"tags":    tags,
+		"date":    time.Now().Format("2006-01-02"),
+		"lastmod": time.Now().Format("2006-01-02"),
+		"draft":   false,
 	}
 
 	yamlData, err := yaml.Marshal(frontmatter)

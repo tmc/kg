@@ -40,11 +40,11 @@ func newFrontmatterNormalizeCmd() *cobra.Command {
 
 func newFrontmatterUpdateCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "update [key] [value]",
+		Use:   "update [node] [key] [value]",
 		Short: "Bulk update a frontmatter field across all notes",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return updateFrontmatter(args[0], args[1])
+			return updateFrontmatter(args[1], args[2], args[3])
 		},
 	}
 
@@ -131,27 +131,6 @@ func normalizeFields(frontmatter map[string]interface{}) map[string]interface{} 
 	// Add more normalization rules as needed
 
 	return frontmatter
-}
-
-func updateFrontmatter(key, value string) error {
-	notesDir := viper.GetString("notes_directory")
-	if notesDir == "" {
-		return fmt.Errorf("notes directory not set in config")
-	}
-
-	return filepath.Walk(notesDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !info.IsDir() && strings.HasSuffix(info.Name(), ".md") {
-			if err := updateFileField(path, key, value); err != nil {
-				return fmt.Errorf("failed to update %s: %w", path, err)
-			}
-		}
-
-		return nil
-	})
 }
 
 func updateFileField(path, key, value string) error {

@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tmc/dot"
-	"gopkg.in/yaml.v3"
 )
 
 func newVisualizeCmd() *cobra.Command {
@@ -17,7 +16,7 @@ func newVisualizeCmd() *cobra.Command {
 		Use:   "visualize",
 		Short: "Generate graph representation",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return visualizeGraph()
+			return visualizeGraph(cmd, args)
 		},
 	}
 
@@ -29,7 +28,7 @@ func newVisualizeCmd() *cobra.Command {
 	return cmd
 }
 
-func visualizeGraph() error {
+func visualizeGraph(cmd *cobra.Command, args []string) error {
 	notesDir := viper.GetString("notes_directory")
 	if notesDir == "" {
 		return fmt.Errorf("notes directory not set in config")
@@ -40,9 +39,11 @@ func visualizeGraph() error {
 	layout, _ := cmd.Flags().GetString("layout")
 	filterTags, _ := cmd.Flags().GetStringSlice("filter")
 
-	graph := dot.NewGraph()
-	graph.SetName("KnowledgeGraph")
-	graph.SetDir(true)
+	graph := dot.NewGraph("KnowledgeGraph")
+	// attach args:
+	for _, arg := range args {
+		graph.Set("args", arg)
+	}
 
 	err := filepath.Walk(notesDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -75,44 +76,6 @@ func visualizeGraph() error {
 	return generateDOTFile(graph, outputFile, layout)
 }
 
-func parseNote(path string) (Note, error) {
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return Note{}, fmt.Errorf("failed to read file: %w", err)
-	}
-
-	parts := strings.SplitN(string(content), "---", 3)
-	if len(parts) != 3 {
-		return Note{}, fmt.Errorf("invalid note format")
-	}
-
-	var frontmatter map[string]interface{}
-	if err := yaml.Unmarshal([]byte(parts[1]), &frontmatter); err != nil {
-		return Note{}, fmt.Errorf("failed to parse frontmatter: %w", err)
-	}
-
-	note := Note{
-		Title:       frontmatter["title"].(string),
-		Filename:    filepath.Base(path),
-		Tags:        []string{},
-		Connections: []string{},
-	}
-
-	if tags, ok := frontmatter["tags"].([]interface{}); ok {
-		for _, tag := range tags {
-			note.Tags = append(note.Tags, tag.(string))
-		}
-	}
-
-	if connections, ok := frontmatter["connected_to"].([]interface{}); ok {
-		for _, conn := range connections {
-			note.Connections = append(note.Connections, conn.(string))
-		}
-	}
-
-	return note, nil
-}
-
 func shouldIncludeNote(note Note, filterTags []string) bool {
 	if len(filterTags) == 0 {
 		return true
@@ -130,15 +93,18 @@ func shouldIncludeNote(note Note, filterTags []string) bool {
 }
 
 func addNodeToGraph(graph *dot.Graph, note Note) {
-	attrs := make(map[string]string)
-	attrs["label"] = note.Title
-	attrs["shape"] = "box"
-	graph.AddNode("KnowledgeGraph", note.Filename, attrs)
+	n := dot.NewNode("KnowledgeGraph")
+	n.Set("shape", "box")
+	n.Set("label", note.Title)
+	graph.AddNode(n)
 }
 
 func addEdgesToGraph(graph *dot.Graph, note Note) {
 	for _, connection := range note.Connections {
-		graph.AddEdge(note.Filename, connection, true, nil)
+		_ = connection
+		// TODO:
+		// e := dot.NewEdge(conn..
+		// graph.AddEdge(note.Filename, connection, true, nil)
 	}
 }
 

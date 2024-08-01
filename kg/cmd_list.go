@@ -18,9 +18,7 @@ func newListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Show all notes with frontmatter info",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return listNotes()
-		},
+		RunE:  listNotes,
 	}
 
 	cmd.Flags().StringP("sort", "s", "title", "Sort by field (title, date, lastmod)")
@@ -38,7 +36,7 @@ type NoteInfo struct {
 	LastMod  time.Time
 }
 
-func listNotes() error {
+func listNotes(cmd *cobra.Command, args []string) error {
 	notesDir := viper.GetString("notes_directory")
 	if notesDir == "" {
 		return fmt.Errorf("notes directory not set in config")
