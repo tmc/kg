@@ -173,6 +173,7 @@ func displayResults(results *bleve.SearchResult) {
 					fmt.Printf("... %s ...\n", highlightMatches(fragment, highlighter))
 				}
 			}
+			_ = content
 		}
 
 		fmt.Println(strings.Repeat("-", 40))
